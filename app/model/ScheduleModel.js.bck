@@ -1,0 +1,41 @@
+Ext.define('Journal.model.ScheduleModel', {
+	extend: 'Ext.data.Model',
+	idProperty: 'sc_id',
+	fields: [
+		'sc_id',
+		{ name: 'sc_date',type: 'date', dateFormat: 'Y-m-d H:i:s'},
+		'sc_wday', //virtual
+		'sc_from',
+		'sc_until',
+		'sc_cl_id',
+		'sc_cr_id',
+		'sc_cc_id',
+		'sc_lessontheme', // lesson theme
+		'sc_parent',
+		'sc_selected',
+		'sc_freqcount',
+		'sc_freqperiod',
+		{ name: 'sc_till', type: 'date', dateFormat: 'Y-m-d H:i:s'},
+		'sc_created',
+		'sc_modified'
+	],
+	
+	proxy: {
+		type: 'ajax',
+		api: {
+			read:'data/index.php?t=schedulegrid/main',
+			destroy:'data/index.php?t=schedulegrid/modify&action=delete'
+		},
+		reader: {
+			type:'json',
+			root:'values',
+			totalProperty:'total',
+			successProperty:'success'
+		},
+		writer: {
+			type:'json',
+			encode: true,
+			root:'ids'
+		}
+	}
+});

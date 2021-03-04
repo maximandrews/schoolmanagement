@@ -1,0 +1,528 @@
+Ext.define('Journal.controller.modules.Schedule', {
+	extend: 'Journal.controller.Module',
+
+	shortcutId: 'schedule',
+	shortcutName: 'Stundu saraksts',
+	shortcutIconCls: 'schedule-icon',
+	viewClass: 'schedule', //galvenais skats 
+
+	views: [ 'modules.ScheduleView', 'modules.AddScheduleView' ],
+	models: [ 'ScheduleModel', 'ClassRegisterClassModel' ],
+	stores: [ 'ScheduleStore', 'ClassRegisterClassStore' ],
+
+	requires: [
+		'Journal.Notification'
+	],
+ // Pašreizejais mēnesis un gads
+	curMonth: null,
+	curYear: null,
+	idParent: 0,
+	idStore: 0,
+	scheduleEditView: null,
+	startSched: 0,
+	endSched: 0,
+	coursesNames: [
+		[0, 'Informātika'],
+		[1, 'Latviešu valoda un literatūra'],
+		[2, 'Matemātika'],
+		[3, 'Vēsture'],
+		[4, 'Pirmā svešvaloda (angļu valoda)'],
+		[5, 'Otrā svešvaloda (vācu vai krievu valoda)'],
+		[6, 'Sports'],
+		[7, 'Informātika'],
+		[8, 'Biznesa ekonomiskie pamati'],
+		[9, 'Ģeogrāfija'],
+		[10, 'Fizika'],
+		[11, 'Ķīmija'],
+		[12, 'Bioloģija'],
+		[13, 'Veselības mācība'],
+		[14, 'Mūzika'],
+		[15, 'Kultūras vēsture'],
+		[16, 'Programmēšanas pamati'],
+		[17, 'Psiholoģija'],
+		[18, 'Politika un tiesības'],
+		[19, 'Tehniskā grafika'],
+		[20, 'Angļu valoda'],
+		[21, 'Latviešu literatūra'],
+		[22, 'Krievu valoda'],
+		[23, 'Fizika'],
+		[24, 'Ķīmija'],
+		[25, 'Matemātika'],
+		[26, 'Latviešu valoda'],
+		[27, 'Amatu mācība/Mājturība'],
+		[28, 'Sports'],
+		[29, 'Franču valoda'],
+		[30, 'Geogrāfija'],
+		[31, 'Bioloģija'],
+		[32, 'Krievu literatūra'],
+		[33, 'Vizuāla māksla'],
+		[34, 'Mūzika'],
+		[35, 'Vēsture'],
+		[36, 'Informātika']
+	],
+
+	init: function() {
+		var me = this,
+			tDate = new Date();
+		me.callParent();
+		
+		me.curYear = tDate.getFullYear();
+		me.curMonth = tDate.getMonth();
+		me.setStartEndDate();
+	},
+
+	afterMainView: function (mView) {
+		var me = this;
+
+		var crcombo = mView.down('#sv-class-combo');
+		if(crcombo) crcombo.select(crcombo.store.getAt(0));
+	},
+
+	getLessonTime: function() {
+		var tDate = new Date(),
+			shortBreak = 10,
+			longBreak = 20,
+			lesson = 45,
+			time = [];
+
+		tDate.setHours(8);
+		tDate.setMinutes(0);
+		for (var d = 0; d < 8; d++) {
+			var hour = tDate.getHours(),
+				minutes = tDate.getMinutes();
+			tDate.setMinutes(minutes+lesson);
+			var endHours = tDate.getHours(),
+				endMinutes = tDate.getMinutes();
+			hour = (hour < 10 ? '0':'')+hour;
+			minutes = (minutes < 10 ? '0':'')+minutes;
+			timeStr = hour+':'+minutes+' - '+(endHours < 10 ? '0'+endHours:endHours)+':'+(endMinutes < 10 ? '0'+endMinutes:endMinutes);
+			time[d] = [hour+':'+minutes, timeStr];
+			tDate.setMinutes(tDate.getMinutes()+(d%4 == 0 ? longBreak:shortBreak));
+		}
+		return time;
+	},
+
+	setShceduleInterval: function() {
+		var me = this,
+				month = me.curMonth+1,
+				interval = me.getMView().down('#sv-month-interval');
+
+		if(interval){
+			intText = (month<10? '0':'')+month+'.'+me.curYear;
+			interval.setText(intText);
+		}
+	},
+	
+	getScheduleData: function () {
+		var me = this,
+			cList = me.coursesNames,
+			scheduleGrid = [],
+			tDate = new Date(me.curYear, me.curMonth, 1),
+			fWDay = tDate.getDay(),
+			shortBreak = 10,
+			longBreak = 20,
+			lesson = 45,
+			dStart = 1,
+			dEnd = 6;
+
+		fWDay = fWDay == 0 ? 7:fWDay;
+
+		if(fWDay > 1 && fWDay < 6) me.app.changeDate(tDate, 1-fWDay);
+		else if(fWDay == 6) me.app.changeDate(tDate, 2);
+		else if(fWDay == 7) me.app.changeDate(tDate, 1);
+
+		// for testing purpose 
+		//me.app.changeDate(tDate, -7);
+		
+		do {
+			for(var i = dStart; i < dEnd ;i++) {
+				var date = tDate.getDate(),
+						month = tDate.getMonth()+1;
+	
+				if(month < 10) { month = '0'+month; }
+				if(date < 10) { date = '0'+date; }
+	
+				num = Math.floor(4+(8-4)*Math.random());
+				tDate.setHours(8);
+				tDate.setMinutes(0);
+	
+				for (var d = 0; d < num; d++) {
+					var hour = tDate.getHours(),
+							minutes = tDate.getMinutes();
+					tDate.setMinutes(minutes+lesson);
+					var endHours = tDate.getHours(),
+							endMinutes = tDate.getMinutes();
+					hour = (hour < 10 ? '0':'')+hour;
+					minutes = (minutes < 10 ? '0':'')+minutes;
+	
+					var c = scheduleGrid.length;
+					scheduleGrid[c] = [];
+					scheduleGrid[c][0] = c;
+					scheduleGrid[c][1] = '';
+					scheduleGrid[c][2] = date+'.'+month+'.'+tDate.getFullYear();
+					scheduleGrid[c][3] = tDate.getDay();
+					scheduleGrid[c][4] = hour+':'+minutes;
+					scheduleGrid[c][5] = (endHours < 10 ? '0'+endHours:endHours)+':'+(endMinutes < 10 ? '0'+endMinutes:endMinutes);
+					scheduleGrid[c][6] = '';
+					scheduleGrid[c][7] = cList[Math.floor(Math.random()*cList.length)][0];
+					scheduleGrid[c][8] = '';
+					scheduleGrid[c][9] = '';
+					scheduleGrid[c][10] = '';
+					scheduleGrid[c][11] = false;
+					scheduleGrid[c][12] = '';//2;
+					scheduleGrid[c][13] = '';//'Diena';
+					scheduleGrid[c][14] = '';//'01.04.2012';
+					scheduleGrid[c][15] = '';// 5;
+
+					tDate.setMinutes(tDate.getMinutes()+(d%4 == 0 ? longBreak:shortBreak));
+				}
+				
+				var c = scheduleGrid.length;
+				scheduleGrid[c] = [];
+				scheduleGrid[c][0] = c;
+				scheduleGrid[c][1] = '';
+				scheduleGrid[c][2] = date+'.'+month+'.'+tDate.getFullYear();
+				scheduleGrid[c][3] = tDate.getDay();
+				scheduleGrid[c][4] = '99:99';
+				scheduleGrid[c][5] = '';
+				scheduleGrid[c][6] = '';
+				scheduleGrid[c][7] = '';
+				scheduleGrid[c][8] = '';
+				scheduleGrid[c][9] = '';
+				scheduleGrid[c][10] = '';
+				scheduleGrid[c][11] = '';
+				scheduleGrid[c][12] = '';
+				scheduleGrid[c][13] = '';
+				scheduleGrid[c][14] = '';
+				scheduleGrid[c][15] = '';
+
+				me.app.changeDate(tDate, scheduleGrid[c][3] == 5 ?3:1);
+			}
+		} while (tDate.getMonth() <= me.curMonth);
+
+		return scheduleGrid;
+	},
+
+	onScheduleEventClick: function (dataView, rec, item, index, e, eOpts) {
+		var me = this;
+			data = rec.data,
+		me.scheduleEditView = Ext.widget('addschedule', { app: me.app, controller: me });
+		if(data.sc_from != '99:99') {
+			me.scheduleEditView.items.getAt(0).loadRecord(rec);
+		} else {
+			me.scheduleEditView.items.getAt(0).loadRecord(new Journal.model.ScheduleModel({
+				sc_date: data['sc_date']
+			}));
+		}
+		me.getMView().add(me.scheduleEditView);
+		me.scheduleEditView.show();
+		me.getMView().setDisabled(true);
+	},
+
+	onCheckHide: function(chb, state) {
+		var me = this,
+			shl = me.scheduleEditView,
+			fVals = shl.items.getAt(0).getValues(),
+			tDate = shl.down('#fields-to-hide3').safeParse(fVals.sc_date, 'd.m.Y');
+			me.app.changeDate(tDate, 1);
+		//shl.down('#fields-to-hide1').clearInvalid();
+		//shl.down('#fields-to-hide2').clearInvalid();
+		//shl.down('#fields-to-hide3').clearInvalid();
+		shl.down('#fields-to-hide1').setDisabled(!state);
+		shl.down('#fields-to-hide2').setDisabled(!state);
+		shl.down('#fields-to-hide3').setDisabled(!state);
+		shl.down('#fields-to-hide1').setVisible(state);
+		shl.down('#fields-to-hide2').setVisible(state);
+		shl.down('#fields-to-hide3').setVisible(state);
+
+		me.scheduleEditView.items.getAt(0).loadRecord(new Journal.model.ScheduleModel({
+			sc_cr_id: fVals.sc_cr_id,
+			sc_date: fVals.sc_date,
+			sc_from: fVals.sc_from,
+			sc_selected: state,
+			freq_count: !fVals.freq_count ? 1:fVals.freq_count,
+			freq_period: !fVals.freq_period ? 2:fVals.freq_period,
+			sc_till: !fVals.sc_till && !state  ? tDate:(fVals.sc_till || '')
+			//sc_till: !fVals.sc_till && !state ? tDate:''
+		}));
+	},
+
+	onSheduleSaveEdit: function() {
+		var me = this,
+			dForm = me.scheduleEditView.items.getAt(0), // Form
+			fVals = dForm.getValues(),
+			vModel = new Journal.model.ScheduleModel(fVals),
+			errors = vModel.validate(),
+			store = this.getMView().items.getAt(0).store;
+			me.idStore = this.getMView().items.getAt(0).store.count();	
+		if(fVals.sc_selected) {
+			var curDate = fVals.sc_date.split("."),
+				tillD = fVals.sc_till.split("."),
+				tDate =  new Date(parseInt(tillD[2],10), parseInt(tillD[1],10)-1, parseInt(tillD[0],10)),
+				fDate =  new Date(parseInt(curDate[2],10), parseInt(curDate[1],10)-1, parseInt(curDate[0],10)),
+				fqCount = parseInt(fVals.freq_count,10),
+				fqPeriod = parseInt(fVals.freq_period,10);
+		}
+
+		if(!errors.isValid()) {
+			dForm.markInvalid(errors);
+			return false;
+		}
+
+		if(fVals.sc_id) {//edit
+			var model = this.getMView().items.getAt(0).store.findRecord('sc_id', fVals.sc_id); //selected item in model
+			if(model && model.data.sc_selected) { // editing repeats in model 
+				me.scheduleEditView.setDisabled(true);
+				if (fVals.sc_selected) { // editing repeats in model and is selected to repeat in form
+					Ext.Msg.show({
+						title:'Saglabāt izmaiņas?',
+						msg: ' Vai uzdot izmaiņas iepriekš uzdotām  periodam?',
+						modal:true,
+						buttons: Ext.Msg.YESNO,
+						icon: Ext.Msg.QUESTION,
+						fn: function (buttonId, text, opt) {
+							me.scheduleEditView.setDisabled(false);
+							switch (buttonId) {
+								case 'yes':
+									var month = model.data.sc_till.getMonth()+1,
+									text = (model.data.sc_till.getDate()<10 ? '0':'')+model.data.sc_till.getDate()+'.'+(month<10 ? '0':'')+month+'.'+model.data.sc_till.getFullYear();
+									if( model.data.freq_period != fVals.freq_period || model.data.sc_till != fVals.sc_till || model.data.freq_count != fVals.freq_count) {
+										me.getMView().items.getAt(0).store.each(function(record){
+											if(record.data.sc_parent === model.data.sc_parent) { //find all repeated items
+												fVals.sc_date = record.data.sc_date;
+												fVals.sc_id = record.data.sc_id;
+												record.set(fVals);
+											}
+										}, this );
+										store.sort();
+										me.scheduleEditView.close();
+										} else {//reload data
+											me.scheduleEditView.setDisabled(true);
+											me.showError('Iepriekš uzdotām periodam nedrīkst mainīt atkārtojuma biežumu vai datumu līdz kuram atkārtot!');
+											me.scheduleEditView.setDisabled(false);
+											me.scheduleEditView.items.getAt(0).loadRecord(new Journal.model.ScheduleModel({
+												sc_cr_id:  model.data.sc_cr_id,
+												sc_from:  model.data.sc_from,
+												sc_selected: model.data.sc_selected,
+												sc_date: model.data.sc_date,
+												freq_period: model.data.freq_period,
+												sc_till: model.data.sc_till,
+												freq_count: model.data.freq_count
+											}));
+										}
+									break;
+								case 'no': 
+									me.notSelectedInForm(fVals);
+								break;
+							}
+						}
+					});
+				} else { // repeats in model but do not selected in form
+					me.notSelectedInForm(fVals);
+				}
+			}else if(model  && fVals.sc_selected) { // editing don't repeats in model still but is selected to repeat in form
+				if(tDate < fDate) {
+					me.showError('Datums līdz kuram atkārtot ir mazāks par izvēlēto!');
+				} else {
+					if(fVals.sc_freq_count == '' || fVals.freq_period == '' || fVals.sc_till == '') {
+						me.showError('Perioda lauki nav aizpildīti!');
+					} else {
+						fVals.sc_parent = me.idParent;
+						me.idParent=me.idParent-1;
+						model.set(fVals);
+						store.sort();
+						fDate.setDate(fDate.getDate()+(fqPeriod==1 ? fqCount:fqCount*7) );
+						me.lessonAddingPer(fDate,tDate,fVals, store);
+						me.scheduleEditView.close();
+						me.app.baloon('Priekšmets veiksmīgi pievienots!');
+					}
+				}
+			} else if(model){ // editing don't repeats in model still and not selected to repeat in form
+				model.set(fVals);
+				store.sort();
+				me.scheduleEditView.close();
+				me.app.baloon('Priekšmets veiksmīgi saglabāts!');
+			}
+		} else {//new
+			if(fVals.sc_selected) { //repeats
+				if(tDate < fDate) {
+					me.showError('Datums līdz kuram atkārtot ir mazāks par izvēlēto!');
+				} else {
+						me.lessonAddingPer(fDate,tDate,fVals, store);
+						me.scheduleEditView.close();
+						me.app.baloon('Priekšmets veiksmīgi pievienots!');
+				}
+			}else{ //new lesson
+				fVals.sc_id = me.idStore;
+				me.idStore = me.idStore + 1;
+				store.add(fVals);
+				me.scheduleEditView.close();
+				me.app.baloon('Priekšmets veiksmīgi pievienots!');
+			}
+		}
+	},
+
+	notSelectedInForm: function(fVals){
+		var me = this,
+			model = this.getMView().items.getAt(0).store.findRecord('sc_id', fVals.sc_id);
+
+		fVals.freq_count = '';
+		fVals.freq_period = '';
+		fVals.sc_till = '';
+		fVals.sc_selected = false;
+		fVals.sc_parent = '';
+		model.set(fVals);
+		me.scheduleEditView.close();
+		me.app.baloon('Priekšmets veiksmīgi saglabāts!');
+	},
+
+	lessonAddingPer: function(fDate,tDate,fVals, store) {
+		var me = this,
+			fqCount = parseInt(fVals.freq_count,10),
+			fqPeriod = parseInt(fVals.freq_period,10);
+			
+		me.idParent = me.idParent + 1;
+		switch (fqPeriod) {
+			case 1: //Day
+				me.setPeriod(fqCount, fqPeriod, fDate, tDate, fVals, store);
+			break;  
+			case 2: //Week
+				me.setPeriod(fqCount, fqPeriod, fDate, tDate, fVals, store);
+			break;
+		}
+		
+	},
+
+	setPeriod: function(fqCount, fqPeriod, fDate, tDate, fVals, store){
+		var me = this;
+		while( fDate <= tDate ){
+			var wday = fDate.getDay(),
+				daySkeep = 0,
+				curDay,
+				month = parseInt(fDate.getMonth(),10)+1,
+				plusDays = fqCount*(fqPeriod == 1 ? 1:5);
+
+			while(daySkeep < plusDays) {
+				if(wday+plusDays-daySkeep >= 6) plusDays++;
+				if(wday+plusDays-daySkeep >= 7) plusDays++;
+				daySkeep += 7;
+			}
+			fVals.sc_id = me.idStore++;
+			fVals.sc_date = (fDate.getDate()<10 ? '0':'')+fDate.getDate()+'.'+(month<10 ? '0':'')+month+'.'+fDate.getFullYear(); 
+			fVals.sc_parent = me.idParent;
+			store.add(fVals);
+			me.app.changeDate(fDate, plusDays);
+		}
+	},
+
+	setMonthPickerDate: function (cmp, e) {
+		if(cmp.setValue) cmp.setValue(new Date(this.curYear, this.curMonth, 1));
+	},
+
+	showError: function(text){
+		var me = this,
+			msgTxt = text;
+
+		Ext.Msg.show({
+			title:'Kļūda',
+			msg: msgTxt,
+			buttons: Ext.Msg.OK,
+			icon: Ext.Msg.ERROR
+		}); 
+	},
+
+	onDateSet: function(cmp, arr, e) {
+		var me = this,
+			dt = cmp.getValue();
+			//alert(dt+'; check:'+(dt[0] !== null ? dt[0]:me.curMonth));
+		me.curMonth = dt[0] !== null ? dt[0]:me.curMonth;
+		me.curYear = dt[1] || me.curYear;
+		me.setStartEndDate();
+		me.setShceduleInterval();
+		me.getMView().items.getAt(0).store.load();
+		//me.filterSchedule();
+	},
+
+		// View handlers  --------------------------- START
+	classSelector: function () {
+		var me = this;
+
+		me.setShceduleInterval();
+		this.getMView().items.getAt(0).store.load();
+		//this.getMView().callParent();
+		//me.filterSchedule();
+	},
+
+	nextButtonHandler: function(){
+		var me = this;
+
+		me.curMonth = me.curMonth + 1;
+		if ( me.curMonth > 11 ) { 
+			me.curYear = me.curYear + 1;
+			me.curMonth = 0;
+		}
+		me.setStartEndDate();
+		me.setShceduleInterval();
+		me.getMView().items.getAt(0).store.load();
+		//me.filterSchedule();
+	},
+
+	prevButtonHandler: function(){
+		var me = this;
+
+		if (!me.curMonth) {
+			me.curYear = me.curYear - 1;
+			me.curMonth = 12;
+		}
+		me.curMonth = me.curMonth - 1;
+		me.setStartEndDate();
+		me.setShceduleInterval();
+		me.getMView().items.getAt(0).store.load();
+		//me.filterSchedule();
+	},
+		// View handlers  --------------------------- END
+
+	beforeSchedileEditClose: function(panel, eOps){
+		this.getMView().setDisabled(false);
+	},
+
+	setStartEndDate: function(){
+		var me = this,
+			sDate =  new Date(me.curYear, me.curMonth, 1),
+			sWDay = sDate.getDay(),
+			// Dienu skaits mēnesī
+			curMonth = new Date(sDate.getFullYear(),sDate.getMonth()+1,0).getDate(),
+			fDate = new Date(sDate.getFullYear(),sDate.getMonth(), curMonth);
+			fWday = fDate.getDay();
+
+		sWDay = sWDay == 0 ? 7:sWDay;
+		fWday = fWday == 0 ? 7:fWday;
+
+		// iegūstam mēneša perodu, kuru attēlosīm nosardības sarakstā
+		// Ipriekšejais mēnesis
+		if(sWDay > 1 && sWDay < 6) me.app.changeDate(sDate, 1-sWDay);
+		else if(sWDay == 6) me.app.changeDate(sDate, 2);
+		else if(sWDay == 7) me.app.changeDate(sDate, 1);
+		me.startSched = sDate;
+		
+		// Nākamais mēnesis
+		if(fWday >= 1 && fWday < 6) me.app.changeDate(fDate, 5-fWday);
+		else if(fWday == 6) me.app.changeDate(fDate, -1);
+		else if(fWday == 7) me.app.changeDate(fDate, -2);		
+		me.endSched = fDate;
+	},
+
+	filterSchedule: function () {
+		var me = this,
+			psstore = me.getMView().items.getAt(0).store;
+		if(psstore) {
+			psstore.clearFilter();
+			psstore.filter([{ 
+				filterFn: function(item) {
+					if( item.get('sc_date') >= me.startSched && item.get('sc_date') <= me.endSched )
+						return true;
+				}
+			}]);
+		}
+	}
+});

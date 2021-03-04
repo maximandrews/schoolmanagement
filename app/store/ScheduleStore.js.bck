@@ -1,0 +1,71 @@
+Ext.define('Journal.store.ScheduleStore', {
+	extend: 'Ext.data.Store',
+
+	model: 'Journal.model.ScheduleModel',
+	remoteGroup: false,
+	remoteSort: false,
+	groupField: 'sc_date',
+	groupDir: 'ASC',
+	sorters: [{
+		property : 'sc_date',
+		direction: 'ASC'
+	},{
+		property : 'sc_from',
+		direction: 'ASC'
+	}],
+
+	listeners: {
+		load: function (store, recs, success, eOpts) {
+			if(success) {
+				var lastRec;
+				if(store.getCount() > 0)
+				store.each(function (rec) {
+					if(lastRec && lastRec.data.sc_date !=)
+				});
+			}
+		},
+		beforeload: function (store, op, eOpts) {
+			var sWin = Ext.getCmp('schedule-view'),
+					cmb = Ext.getCmp('sv-class-combo');
+
+			store.remoteGroup = false;
+			store.remoteSort = false;
+
+			if(sWin && sWin.controller && store && store.getProxy) {
+				var ctrl = sWin.controller,
+						tDate = new Date(ctrl.curYear, ctrl.curMonth, 1)
+						lDate = new Date(ctrl.curYear, ctrl.curMonth, ctrl.app.DaysInMonth(ctrl.curYear, ctrl.curMonth)),
+						fWDay = tDate.getDay(),
+						lWDay = lDate.getDay(),
+						proxy = store.getProxy();
+
+				
+				fWDay = fWDay == 0 ? 7:fWDay;
+				if(fWDay > 1 && fWDay < 6) ctrl.app.changeDate(tDate, 1-fWDay);
+				else if(fWDay == 6) ctrl.app.changeDate(tDate, 2);
+				else if(fWDay == 7) ctrl.app.changeDate(tDate, 1);
+
+				lWDay = lWDay == 0 ? 7:lWDay;
+				if(lWDay > 0 && lWDay < 5) ctrl.app.changeDate(lDate, 5-lWDay);
+				else if(lWDay == 6) ctrl.app.changeDate(tDate, -1);
+				else if(lWDay == 7) ctrl.app.changeDate(tDate, -2);
+				
+				var ys = tDate.getFullYear(),
+						ms = tDate.getMonth()+1,
+						ds = tDate.getDate(),
+						ye = lDate.getFullYear(),
+						me = lDate.getMonth()+1,
+						de = lDate.getDate();
+
+				if(ms < 10) ms = '0'+ms;
+				if(ds < 10) ds = '0'+ds;
+				if(me < 10) me = '0'+me;
+				if(de < 10) de = '0'+de;
+
+				proxy.setExtraParam('sc_date_from', ds+'.'+ms+'.'+ys);
+				proxy.setExtraParam('sc_date_to', de+'.'+me+'.'+ye);
+				proxy.setExtraParam('sc_cl_id', cmb.getValue());
+			}
+		}
+	}
+});

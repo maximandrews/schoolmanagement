@@ -1,0 +1,209 @@
+/* New icon classes */
+
+.class-register-icon { background-image: url(../i/icons/16/grid16.png) !important; }
+#tools-desk .class-register-icon { background-image: url(../i/icons/48/grid48.png) !important; }
+
+.record-book-icon { background-image: url(../i/icons/16/book16.png) !important; }
+#tools-desk .record-book-icon { background-image: url(../i/icons/48/book48.png) !important; }
+
+.person-data-icon{ background-image: url(../i/icons/16/profile16.png) !important; }
+#tools-desk .person-data-icon { background-image: url(../i/icons/48/profile48.png) !important; }
+
+.user-reg-icon{ background-image: url(../i/icons/16/users16.png) !important; }
+#tools-desk .user-reg-icon { background-image: url(../i/icons/48/users48.png) !important; }
+
+.class-reg-icon{ background-image: url(../i/icons/16/class16.png) !important; }
+#tools-desk .class-reg-icon { background-image: url(../i/icons/48/class48.png) !important; }
+
+.pretendent-list-icon{ background-image: url(../i/icons/16/check16.png) !important; }
+#tools-desk .pretendent-list-icon { background-image: url(../i/icons/48/check48.png) !important; }
+
+.lesson-list-icon{ background-image: url(../i/icons/16/lesson16.png) !important; }
+#tools-desk .lesson-list-icon { background-image: url(../i/icons/48/lesson48.png) !important; }
+
+.schedule-icon { background-image: url(../i/icons/16/schedule16.png) !important; }
+#tools-desk .schedule-icon { background-image: url(../i/icons/48/schedule48.png) !important; }
+
+/* Common used in forms */
+
+.icon-add { background-image: url(../i/icons/icon/add.png) !important; }
+.icon-accept { background-image: url(../i/icons/icon/accept.png) !important;}
+.icon-delete { background-image: url(../i/icons/icon/delete.png) !important;}
+.icon-edit-butt { 
+	background-image: url(../i/icons/icon/accept.png) !important;
+	width: 16px;
+	height: 16px;
+}
+
+.icon-delete-butt { 
+	background-image: url(../i/icons/icon/delete.png) !important;
+	width: 16px;
+	height: 16px;
+}
+
+/* hide borders of picker rendered in Record Book calendar */
+.record-book-picker table.x-datepicker-inner .x-datepicker-today a { border: none }
+
+/* area where placed all icons*/
+.tools-desk { margin:0 auto } 
+
+/*----------------------------------------------------
+    TaskBar
+-----------------------------------------------------*/
+
+.ux-desktop-windowbar .x-btn-inner { text-align: left !important; }
+
+.taskbar .toolbar { height: 28px; }
+
+/* x-toolbar instead of toolbar because property belongs to all toolbars on taskbar panel */
+.taskbar .x-toolbar {
+	background: transparent none;
+	border-color: transparent;
+}
+
+.taskbar {
+	height: 28px;
+	padding: 0;
+}
+
+/*----------------------------------------------------
+    Tray Clock
+------------------------------------------------------*/
+
+.taskbar-trayclock {
+	text-align: center;
+	vertical-align: middle;
+	padding-top: 0;
+	padding-bottom: 0
+}
+
+/*----------------------------------------------------
+    Desktop DataView
+-----------------------------------------------------*/
+
+.desk-wallpaper { background-color: #3d71b8 }
+
+.desk-wallpaper-tiled { background-repeat: repeat }
+
+.journal-desk-shortcut {
+	float: left;
+	cursor: pointer;
+	text-align: center;
+	padding: 8px;
+	margin: 8px;
+	width: 64px;
+}
+
+.journal-desk-shortcut-icon {
+	width: 48px;
+	height: 48px;
+	background-color: transparent;
+	background-repeat: no-repeat
+}
+
+.journal-desk-shortcut-text {
+	font: normal 10px tahoma,arial,verdana,sans-serif;
+	text-decoration: none;
+	text-align: center;
+	padding-top: 5px;
+	color: white
+}
+
+.x-view-over .journal-desk-shortcut-text { text-decoration: underline }
+
+/* schedule classes */
+.schedule-week { background-color: #E8E8E8  }
+
+.schedule-day {
+	width: 150px;
+	float: left;
+	overflow-x: hidden;
+	padding: 5px 5px 10px 5px;
+	border-top-left-radius:2em;
+	border-top-right-radius:2em
+}
+
+.schedule-date {
+	text-align: center;
+	background-color:#CED9E7;
+	padding: 4px 0;
+	color: #15498B;
+    font: bold 11px tahoma,arial,verdana,sans-serif;
+
+}
+
+.journal-schedule-event-time { 
+	margin: 0 5px 0 2px;
+	display: block;
+	float: left
+}
+
+.journal-schedule-event-text {
+	display: block;
+	float: left;
+	width: 99px
+	
+}
+
+.journal-schedule-event {
+	cursor: pointer;
+	border:1px solid #FFF;
+	border-bottom:1px solid #E8E8E8;
+	background-color: white;
+	padding: 1px 0
+}
+
+.journal-schedule-event:hover {
+	background-color: #cbdaf0;
+	border-style: dotted;
+	border-color: #8eabe4
+}
+
+.add-event { 
+	text-align: center;
+	padding: 2px 5px 3px 5px;
+	border: none;
+	border-bottom-left-radius: 0.5em;
+	border-bottom-right-radius: 0.5em;
+	color: #15498B;
+    font: bold 11px tahoma,arial,verdana,sans-serif;
+	background-color:#CED9E7
+}
+
+.add-event:hover { border: none }
+
+.not-active-month .schedule-date,
+.not-active-month .add-event {
+	background-color: lightgrey;
+	color: grey
+}
+
+.not-active-month .journal-schedule-event {
+	color: grey
+}
+
+/* desktop classes */
+.logout { background-image: url( ../i/icons/16/logout16.gif ) !important; }
+.settings { background-image: url( ../i/icons/16/gears16.gif ) !important; }
+
+/* notification */
+.ux-notification-window .x-window-body {
+	text-align: center;
+	padding: 15px 5px 15px 5px;
+	width: 200px;
+}
+.ux-notification-icon-information { background-image: url(../i/icons/icon/info.png) !important;}
+.ux-notification-light .x-window-header {
+	background-color: transparent;
+}
+
+body .ux-notification-light {
+	background-image: url(../i/icons/icon/fader.png) !important; 
+}
+.ux-notification-light .x-window-body {
+	text-align: center;
+	padding: 15px 5px 18px 5px;
+	width: 200px;
+	background-color: transparent;
+	border: 0px solid white;
+}
